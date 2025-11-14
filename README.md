@@ -51,64 +51,193 @@ Below is executable JavaScript. When you open this via `index.html`, it runs aut
 
 ```js
 function main(params) {
-  // Get parameters from URL
   const name = params.name || 'World'
   const color = params.color || '#58a6ff'
 
-  // Create interactive UI
   const output = document.getElementById('output')
 
+  // Navigation examples database
+  const examples = [
+    {
+      emoji: '🎨',
+      title: 'Gallery',
+      desc: 'Visual showcase of all examples',
+      url: '?src=gallery.md',
+      bg: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+    },
+    {
+      emoji: '👋',
+      title: 'Hello World',
+      desc: 'Minimal example',
+      url: '?src=hello.md&name=Visitor',
+      bg: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
+    },
+    {
+      emoji: '🤖',
+      title: 'Multi-Agent',
+      desc: 'Browser-based coordination',
+      url: '?src=substrate-agent.md&id=agent1&port=5001',
+      bg: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
+    },
+    {
+      emoji: '🌌',
+      title: 'Particle Galaxy',
+      desc: '10K particles in 3D space',
+      url: '?src=particles.md&count=10000',
+      bg: 'linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)'
+    },
+    {
+      emoji: '🏔️',
+      title: 'Procedural Terrain',
+      desc: 'Generated landscapes',
+      url: '?src=terrain.md&height=15',
+      bg: 'linear-gradient(135deg, #134e5e 0%, #71b280 100%)'
+    },
+    {
+      emoji: '🌍',
+      title: 'Solar System',
+      desc: 'Orbiting planets',
+      url: '?src=solar-system.md&planets=8',
+      bg: 'linear-gradient(135deg, #000000 0%, #0f0c29 50%, #302b63 100%)'
+    },
+    {
+      emoji: '🌊',
+      title: 'Wave Grid',
+      desc: 'Animated wave patterns',
+      url: '?src=wave-grid.md&size=20&color=rainbow',
+      bg: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
+    },
+    {
+      emoji: '📋',
+      title: 'Templates',
+      desc: 'Copy-paste templates',
+      url: '?src=templates.md',
+      bg: 'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)'
+    }
+  ]
+
+  const docs = [
+    { title: 'Quickstart', url: '?src=QUICKSTART.md', icon: '🚀' },
+    { title: 'Usage Guide', url: '?src=USAGE.md', icon: '📖' },
+    { title: 'Configuration', url: 'config.md', icon: '⚙️' }
+  ]
+
   output.innerHTML = `
-    <div style="max-width: 800px; margin: 0 auto; padding: 40px 20px;">
-      <h1 style="font-size: 4em; margin: 0; color: ${color};">
-        💥 ${name}
-      </h1>
-      <p style="font-size: 1.5em; color: #8b949e; margin-top: 20px;">
-        This page was generated from <code>README.md</code>
-      </p>
+    <div style="min-height: 100vh; background: #0d1117; color: #c9d1d9;">
+      <!-- Hero Section -->
+      <div style="max-width: 1200px; margin: 0 auto; padding: 60px 20px 40px;">
+        <div style="text-align: center; margin-bottom: 60px;">
+          <h1 style="font-size: 4em; margin: 0; background: linear-gradient(135deg, ${color} 0%, #7b68ee 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+            💥 MDRUN
+          </h1>
+          <p style="font-size: 1.8em; color: #8b949e; margin: 20px 0 10px 0;">
+            Markdown Executable Runtime
+          </p>
+          <p style="font-size: 1.2em; color: #484f58; max-width: 600px; margin: 0 auto;">
+            Where documentation becomes the application
+          </p>
+        </div>
 
-      <div style="margin-top: 40px; padding: 20px; background: #161b22; border-radius: 8px;">
-        <h2 style="color: #58a6ff;">Parameters Received:</h2>
-        <pre style="color: #c9d1d9; overflow-x: auto;">${JSON.stringify(params, null, 2)}</pre>
-      </div>
+        <!-- Quick Stats -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; max-width: 800px; margin: 0 auto 60px;">
+          <div style="text-align: center; padding: 20px; background: #161b22; border-radius: 8px; border: 1px solid #30363d;">
+            <div style="font-size: 2em;">📝</div>
+            <div style="color: #8b949e; font-size: 14px; margin-top: 8px;">Zero Install</div>
+          </div>
+          <div style="text-align: center; padding: 20px; background: #161b22; border-radius: 8px; border: 1px solid #30363d;">
+            <div style="font-size: 2em;">⚡</div>
+            <div style="color: #8b949e; font-size: 14px; margin-top: 8px;">No Build</div>
+          </div>
+          <div style="text-align: center; padding: 20px; background: #161b22; border-radius: 8px; border: 1px solid #30363d;">
+            <div style="font-size: 2em;">🎨</div>
+            <div style="color: #8b949e; font-size: 14px; margin-top: 8px;">3D Graphics</div>
+          </div>
+          <div style="text-align: center; padding: 20px; background: #161b22; border-radius: 8px; border: 1px solid #30363d;">
+            <div style="font-size: 2em;">🔧</div>
+            <div style="color: #8b949e; font-size: 14px; margin-top: 8px;">URL Config</div>
+          </div>
+        </div>
 
-      <div style="margin-top: 40px; padding: 20px; background: #161b22; border-radius: 8px;">
-        <h2 style="color: #58a6ff;">Try These URLs:</h2>
-        <ul style="line-height: 2; color: #8b949e;">
-          <li><a href="?name=Alice&color=hotpink" style="color: #58a6ff;">?name=Alice&color=hotpink</a></li>
-          <li><a href="?name=Bob&color=lime" style="color: #58a6ff;">?name=Bob&color=lime</a></li>
-          <li><a href="?name=Charlie&color=gold" style="color: #58a6ff;">?name=Charlie&color=gold</a></li>
-        </ul>
-      </div>
+        <!-- Examples Grid -->
+        <h2 style="font-size: 2em; margin: 0 0 30px 0; color: #58a6ff;">
+          ✨ Examples & Templates
+        </h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-bottom: 60px;">
+          ${examples.map(ex => `
+            <a href="${ex.url}" style="
+              display: block;
+              padding: 30px;
+              background: ${ex.bg};
+              border-radius: 12px;
+              text-decoration: none;
+              color: white;
+              transition: transform 0.2s, box-shadow 0.2s;
+              cursor: pointer;
+              border: 2px solid rgba(255,255,255,0.1);
+            " onmouseenter="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.4)'" onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+              <div style="font-size: 3em; margin-bottom: 15px;">${ex.emoji}</div>
+              <h3 style="margin: 0 0 10px 0; font-size: 1.4em;">${ex.title}</h3>
+              <p style="margin: 0; opacity: 0.9; font-size: 14px;">${ex.desc}</p>
+            </a>
+          `).join('')}
+        </div>
 
-      <div style="margin-top: 40px; padding: 20px; background: #0d419d; border-radius: 8px;">
-        <h2 style="margin-top: 0;">🎯 The Point</h2>
-        <p style="line-height: 1.8;">
-          This entire page was generated from code blocks in <code>README.md</code>.
-          No build step. No bundler. No npm install.
-          Just markdown → browser → running app.
-        </p>
-      </div>
+        <!-- Documentation -->
+        <h2 style="font-size: 2em; margin: 0 0 20px 0; color: #58a6ff;">
+          📚 Documentation
+        </h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 60px;">
+          ${docs.map(doc => `
+            <a href="${doc.url}" style="
+              display: block;
+              padding: 20px;
+              background: #161b22;
+              border: 1px solid #30363d;
+              border-radius: 8px;
+              text-decoration: none;
+              color: #c9d1d9;
+              transition: border-color 0.2s;
+            " onmouseenter="this.style.borderColor='#58a6ff'" onmouseleave="this.style.borderColor='#30363d'">
+              <span style="font-size: 1.5em; margin-right: 10px;">${doc.icon}</span>
+              <span style="color: #58a6ff;">${doc.title}</span>
+            </a>
+          `).join('')}
+        </div>
 
-      <div style="margin-top: 40px; padding: 20px; border: 2px solid #30363d; border-radius: 8px;">
-        <h2 style="color: #58a6ff;">How It Works:</h2>
-        <ol style="line-height: 2; color: #8b949e;">
-          <li><code>index.html</code> fetches <code>README.md</code></li>
-          <li>Extracts code blocks (js, python, html)</li>
-          <li>Executes them in order</li>
-          <li>Passes URL params to <code>main()</code> function</li>
-        </ol>
-      </div>
+        <!-- Quick Actions -->
+        <div style="background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 40px; margin-bottom: 40px;">
+          <h2 style="margin: 0 0 20px 0; color: #58a6ff;">🚀 Quick Actions</h2>
+          <div style="display: grid; gap: 15px;">
+            <div style="padding: 15px; background: #0d1117; border-radius: 6px; font-family: monospace; font-size: 14px; color: #8b949e;">
+              <strong style="color: #3fb950;">Launch with params:</strong> ?name=${name}&color=${color.replace('#', '0x')}
+            </div>
+            <div style="padding: 15px; background: #0d1117; border-radius: 6px; font-family: monospace; font-size: 14px; color: #8b949e;">
+              <strong style="color: #3fb950;">Debug mode:</strong> ?debug=true&logs=true
+            </div>
+            <div style="padding: 15px; background: #0d1117; border-radius: 6px; font-family: monospace; font-size: 14px; color: #8b949e;">
+              <strong style="color: #3fb950;">Keyboard:</strong> Ctrl+L / Cmd+L to toggle logs
+            </div>
+          </div>
+        </div>
 
-      <div style="margin-top: 60px; text-align: center; color: #484f58;">
-        <p>View source: <a href="README.md" style="color: #58a6ff;">README.md</a> | <a href="index.html" style="color: #58a6ff;">index.html</a></p>
-        <p style="margin-top: 20px;">MDRUN - Markdown Executable Runtime</p>
+        <!-- Footer -->
+        <div style="text-align: center; padding: 40px 0; color: #484f58; border-top: 1px solid #21262d;">
+          <p style="margin: 0 0 10px 0;">
+            Powered by MDRUN v${MDRUN.version} |
+            <a href="README.md" style="color: #58a6ff; text-decoration: none;">Source</a> |
+            <a href="?debug=true" style="color: #58a6ff; text-decoration: none;">Debug</a>
+          </p>
+          <p style="margin: 10px 0 0 0; font-size: 14px;">
+            📝 = 💻 = 🚀
+          </p>
+        </div>
       </div>
     </div>
   `
 
-  console.log(`✅ MDRUN executed with params:`, params)
-  console.log(`💥 Name: ${name}, Color: ${color}`)
+  MDRUN.success('Navigation UI loaded with ' + examples.length + ' examples')
+  console.log(`✅ MDRUN landing page ready`)
+  console.log(`💥 ${examples.length} examples available`)
 }
 ```
 
