@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MDRUN</title>
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #0d1117;
+      color: #c9d1d9;
+    }
+    #output {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .mdrun-status {
+      padding: 10px;
+      background: #161b22;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: #58a6ff;
+    }
+  </style>
+</head>
+<body>
+
+<div id="output"></div>
+
+<script>
+
+let pyodide
+
+async function init() {
+  const statusDiv = document.createElement('div')
+  statusDiv.className = 'mdrun-status'
+  statusDiv.textContent = '⚡ MDRUN initializing...'
+  document.body.insertBefore(statusDiv, document.getElementById('output'))
+
+  try {
+    // Load Pyodide for Python support
+    statusDiv.textContent = '⚡ MDRUN loading Python runtime...'
+    pyodide = await loadPyodide()
+    statusDiv.textContent = '⚡ MDRUN runtime ready'
+
+    // Parse URL parameters
+    const params = new URLSearchParams(location.search)
+    const src = params.get('src') || 'README.md'
+
+    statusDiv.textContent = `⚡ MDRUN fetching ${src}...`
+
+    // Fetch markdown
+    const md = await (await fetch(src)).text()
+
+    // Extract code blocks
+    const blocks = [...md.matchAll(/```(\w+)\n([\s\S]*?)```/g)]
+      .map(m => ({lang: m[1], code: m[2]}))
+
+    statusDiv.textContent = `⚡ MDRUN found ${blocks.length} code blocks`
+
+    // Convert URL params to object
+    const args = Object.fromEntries(params)
+
+    // Execute code blocks
+    for (const b of blocks) {
+      if (b.lang === 'js' || b.lang === 'javascript') {
+        eval(b.code)
+      }
+      if (b.lang === 'python') {
+        pyodide.globals.set('params', pyodide.toPy(args))
+        await pyodide.runPythonAsync(b.code)
+      }
+      if (b.lang === 'html') {
+        document.getElementById('output').innerHTML += b.code
+      }
+    }
+
+    // Call main if it exists
+    if (window.main) {
+      statusDiv.textContent = '⚡ MDRUN executing main()'
+      main(args)
+    }
+
+    statusDiv.textContent = '⚡ MDRUN execution complete'
+    setTimeout(() => statusDiv.remove(), 2000)
+
+  } catch (error) {
+    statusDiv.textContent = `⚡ MDRUN error: ${error.message}`
+    statusDiv.style.color = '#f85149'
+    console.error('MDRUN Error:', error)
+  }
+}
+
+init()
+
+</script>
+
+</body>
+</html>
