@@ -108,6 +108,13 @@ function main(params) {
       bg: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
     },
     {
+      emoji: '🎛️',
+      title: 'State Machine',
+      desc: 'Interactive state transitions',
+      url: '?src=state-machine.md',
+      bg: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+    },
+    {
       emoji: '📋',
       title: 'Templates',
       desc: 'Copy-paste templates',
