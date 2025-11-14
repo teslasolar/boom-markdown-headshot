@@ -273,7 +273,8 @@ async function init() {
 
       if (b.lang === 'js' || b.lang === 'javascript') {
         MDRUN.debug('Running JavaScript block')
-        eval(b.code)
+        // Use indirect eval to ensure global scope
+        ;(0, eval)(b.code)
         MDRUN.success(`JavaScript block ${i + 1} executed`)
       }
 
