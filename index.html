@@ -26,75 +26,308 @@
       font-size: 12px;
       color: #58a6ff;
     }
+    .mdrun-log-panel {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      width: 400px;
+      max-height: 300px;
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 6px 6px 0 0;
+      overflow: hidden;
+      display: none;
+      z-index: 10000;
+    }
+    .mdrun-log-panel.visible {
+      display: block;
+    }
+    .mdrun-log-header {
+      padding: 8px 12px;
+      background: #21262d;
+      border-bottom: 1px solid #30363d;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .mdrun-log-close {
+      cursor: pointer;
+      color: #8b949e;
+      font-size: 16px;
+    }
+    .mdrun-log-close:hover {
+      color: #c9d1d9;
+    }
+    .mdrun-log-content {
+      padding: 8px;
+      max-height: 250px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+    }
+    .mdrun-log-entry {
+      padding: 4px 0;
+      border-bottom: 1px solid #21262d;
+    }
+    .mdrun-log-entry:last-child {
+      border-bottom: none;
+    }
+    .mdrun-log-time {
+      color: #484f58;
+      margin-right: 8px;
+    }
+    .mdrun-log-level {
+      margin-right: 8px;
+      font-weight: bold;
+    }
+    .mdrun-log-level.info { color: #58a6ff; }
+    .mdrun-log-level.success { color: #3fb950; }
+    .mdrun-log-level.warn { color: #d29922; }
+    .mdrun-log-level.error { color: #f85149; }
+    .mdrun-log-level.debug { color: #8b949e; }
   </style>
 </head>
 <body>
 
 <div id="output"></div>
 
+<div id="mdrun-log-panel" class="mdrun-log-panel">
+  <div class="mdrun-log-header">
+    <span>⚡ MDRUN Logs</span>
+    <span class="mdrun-log-close" onclick="MDRUN.toggleLogs()">✕</span>
+  </div>
+  <div id="mdrun-log-content" class="mdrun-log-content"></div>
+</div>
+
 <script>
 
-let pyodide
+// Global MDRUN object with logging and config
+window.MDRUN = {
+  version: '1.0.0',
+  config: {
+    defaultSource: 'README.md',
+    logLevel: 'info', // debug, info, warn, error
+    showLogs: false,
+    autoHideLogs: true,
+    logToConsole: true,
+    loadPython: true,
+    statusDuration: 2000,
+    theme: 'dark'
+  },
+  logs: [],
+  pyodide: null,
+
+  log(level, message, data = null) {
+    const levels = ['debug', 'info', 'warn', 'error', 'success']
+    const levelIndex = levels.indexOf(level)
+    const configLevelIndex = levels.indexOf(this.config.logLevel)
+
+    if (levelIndex < configLevelIndex && level !== 'success') return
+
+    const entry = {
+      time: new Date().toLocaleTimeString(),
+      level,
+      message,
+      data
+    }
+
+    this.logs.push(entry)
+
+    // Console logging
+    if (this.config.logToConsole) {
+      const consoleMethod = level === 'error' ? 'error' : level === 'warn' ? 'warn' : 'log'
+      const prefix = `[MDRUN ${level.toUpperCase()}]`
+      if (data) {
+        console[consoleMethod](prefix, message, data)
+      } else {
+        console[consoleMethod](prefix, message)
+      }
+    }
+
+    // Update log panel
+    this.updateLogPanel()
+  },
+
+  updateLogPanel() {
+    const content = document.getElementById('mdrun-log-content')
+    if (!content) return
+
+    content.innerHTML = this.logs.slice(-50).reverse().map(entry => `
+      <div class="mdrun-log-entry">
+        <span class="mdrun-log-time">${entry.time}</span>
+        <span class="mdrun-log-level ${entry.level}">[${entry.level.toUpperCase()}]</span>
+        <span>${entry.message}</span>
+        ${entry.data ? `<pre style="margin: 4px 0 0 0; color: #8b949e;">${JSON.stringify(entry.data, null, 2)}</pre>` : ''}
+      </div>
+    `).join('')
+  },
+
+  toggleLogs() {
+    const panel = document.getElementById('mdrun-log-panel')
+    panel.classList.toggle('visible')
+    this.config.showLogs = panel.classList.contains('visible')
+  },
+
+  showLogs() {
+    document.getElementById('mdrun-log-panel').classList.add('visible')
+    this.config.showLogs = true
+  },
+
+  hideLogs() {
+    document.getElementById('mdrun-log-panel').classList.remove('visible')
+    this.config.showLogs = false
+  }
+}
+
+// Expose logging shortcuts
+window.MDRUN.debug = (msg, data) => MDRUN.log('debug', msg, data)
+window.MDRUN.info = (msg, data) => MDRUN.log('info', msg, data)
+window.MDRUN.warn = (msg, data) => MDRUN.log('warn', msg, data)
+window.MDRUN.error = (msg, data) => MDRUN.log('error', msg, data)
+window.MDRUN.success = (msg, data) => MDRUN.log('success', msg, data)
+
+async function loadConfig() {
+  try {
+    MDRUN.debug('Attempting to load config.md')
+    const configMd = await fetch('config.md').then(r => r.text())
+
+    // Extract JSON config from markdown code block
+    const configMatch = configMd.match(/```json\n([\s\S]*?)```/)
+    if (configMatch) {
+      const config = JSON.parse(configMatch[1])
+      Object.assign(MDRUN.config, config)
+      MDRUN.success('Config loaded from config.md', config)
+    }
+  } catch (error) {
+    MDRUN.debug('No config.md found or error loading it, using defaults')
+  }
+}
 
 async function init() {
+  MDRUN.info('MDRUN v' + MDRUN.version + ' initializing...')
+
+  // Load config first
+  await loadConfig()
+
+  // Show logs if configured
+  if (MDRUN.config.showLogs) {
+    MDRUN.showLogs()
+  }
+
   const statusDiv = document.createElement('div')
   statusDiv.className = 'mdrun-status'
   statusDiv.textContent = '⚡ MDRUN initializing...'
   document.body.insertBefore(statusDiv, document.getElementById('output'))
 
   try {
-    // Load Pyodide for Python support
-    statusDiv.textContent = '⚡ MDRUN loading Python runtime...'
-    pyodide = await loadPyodide()
-    statusDiv.textContent = '⚡ MDRUN runtime ready'
-
-    // Parse URL parameters
+    // Parse URL parameters (can override config)
     const params = new URLSearchParams(location.search)
-    const src = params.get('src') || 'README.md'
 
+    // Check for debug mode in URL
+    if (params.get('debug') === 'true') {
+      MDRUN.config.logLevel = 'debug'
+      MDRUN.config.showLogs = true
+      MDRUN.showLogs()
+    }
+
+    if (params.get('logs') === 'true') {
+      MDRUN.showLogs()
+    }
+
+    MDRUN.debug('URL Parameters', Object.fromEntries(params))
+
+    // Load Pyodide for Python support
+    if (MDRUN.config.loadPython) {
+      statusDiv.textContent = '⚡ MDRUN loading Python runtime...'
+      MDRUN.info('Loading Pyodide...')
+      MDRUN.pyodide = await loadPyodide()
+      MDRUN.success('Pyodide loaded successfully')
+      statusDiv.textContent = '⚡ MDRUN runtime ready'
+    }
+
+    // Get source file
+    const src = params.get('src') || MDRUN.config.defaultSource
     statusDiv.textContent = `⚡ MDRUN fetching ${src}...`
+    MDRUN.info(`Fetching markdown source: ${src}`)
 
     // Fetch markdown
     const md = await (await fetch(src)).text()
+    MDRUN.debug(`Fetched ${md.length} characters from ${src}`)
 
     // Extract code blocks
     const blocks = [...md.matchAll(/```(\w+)\n([\s\S]*?)```/g)]
       .map(m => ({lang: m[1], code: m[2]}))
 
     statusDiv.textContent = `⚡ MDRUN found ${blocks.length} code blocks`
+    MDRUN.info(`Found ${blocks.length} code blocks`, blocks.map(b => ({ lang: b.lang, size: b.code.length })))
 
     // Convert URL params to object
     const args = Object.fromEntries(params)
 
     // Execute code blocks
-    for (const b of blocks) {
+    for (let i = 0; i < blocks.length; i++) {
+      const b = blocks[i]
+      MDRUN.debug(`Executing block ${i + 1}/${blocks.length} (${b.lang})`)
+
       if (b.lang === 'js' || b.lang === 'javascript') {
+        MDRUN.debug('Running JavaScript block')
         eval(b.code)
+        MDRUN.success(`JavaScript block ${i + 1} executed`)
       }
-      if (b.lang === 'python') {
-        pyodide.globals.set('params', pyodide.toPy(args))
-        await pyodide.runPythonAsync(b.code)
+
+      if (b.lang === 'python' && MDRUN.config.loadPython) {
+        MDRUN.debug('Running Python block')
+        MDRUN.pyodide.globals.set('params', MDRUN.pyodide.toPy(args))
+        await MDRUN.pyodide.runPythonAsync(b.code)
+        MDRUN.success(`Python block ${i + 1} executed`)
       }
+
       if (b.lang === 'html') {
+        MDRUN.debug('Injecting HTML block')
         document.getElementById('output').innerHTML += b.code
+        MDRUN.success(`HTML block ${i + 1} injected`)
       }
     }
 
     // Call main if it exists
     if (window.main) {
       statusDiv.textContent = '⚡ MDRUN executing main()'
+      MDRUN.info('Calling main() function with params', args)
       main(args)
+      MDRUN.success('main() executed successfully')
+    } else {
+      MDRUN.debug('No main() function defined')
     }
 
     statusDiv.textContent = '⚡ MDRUN execution complete'
-    setTimeout(() => statusDiv.remove(), 2000)
+    MDRUN.success('MDRUN execution complete!')
+
+    if (MDRUN.config.autoHideLogs) {
+      setTimeout(() => statusDiv.remove(), MDRUN.config.statusDuration)
+    }
 
   } catch (error) {
     statusDiv.textContent = `⚡ MDRUN error: ${error.message}`
     statusDiv.style.color = '#f85149'
-    console.error('MDRUN Error:', error)
+    MDRUN.error('MDRUN execution failed', { message: error.message, stack: error.stack })
+    MDRUN.showLogs() // Always show logs on error
   }
 }
+
+// Auto-log on console shortcuts
+console.log('%c⚡ MDRUN Runtime Loaded', 'color: #58a6ff; font-size: 14px; font-weight: bold')
+console.log('%cAccess runtime via window.MDRUN', 'color: #8b949e')
+console.log('%cCommands: MDRUN.showLogs(), MDRUN.hideLogs(), MDRUN.config', 'color: #8b949e')
+
+// Keyboard shortcut to toggle logs (Ctrl+L or Cmd+L)
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
+    e.preventDefault()
+    MDRUN.toggleLogs()
+  }
+})
 
 init()
 
