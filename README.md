@@ -6,6 +6,15 @@ Open `index.html?name=YourName` to see this document come alive.
 
 ---
 
+## 🎨 Quick Links
+
+- **[Gallery](index.html?src=gallery.md)** - See all examples (3D worlds, particles, terrain!)
+- **[Templates Guide](index.html?src=templates.md)** - Copy-paste templates
+- **[Quickstart](index.html?src=QUICKSTART.md)** - Get started in 60 seconds
+- **[Config](config.md)** - Configure runtime without editing code
+
+---
+
 ## What is this?
 
 This is a demonstration of MDRUN - a markdown executable runtime where:
@@ -15,6 +24,8 @@ This is a demonstration of MDRUN - a markdown executable runtime where:
 - Just markdown with code blocks
 - Runs directly in browser via URL parameters
 
+**New:** Now with Three.js 3D templates, particle systems, procedural terrain, and more!
+
 ---
 
 ## Try It
@@ -22,11 +33,14 @@ This is a demonstration of MDRUN - a markdown executable runtime where:
 **Local:**
 ```
 file:///path/to/index.html?name=Thomas&color=blue
+file:///path/to/index.html?src=particles.md&count=10000
+file:///path/to/index.html?src=terrain.md&height=20
 ```
 
 **GitHub Pages:**
 ```
 https://username.github.io/repo?name=Thomas&color=blue
+https://username.github.io/repo?src=gallery.md
 ```
 
 ---
