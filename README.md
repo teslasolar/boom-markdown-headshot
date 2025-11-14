@@ -122,118 +122,38 @@ function main(params) {
     { title: 'Configuration', url: 'config.md', icon: '⚙️' }
   ]
 
-  output.innerHTML = `
-    <div style="min-height: 100vh; background: #0d1117; color: #c9d1d9;">
-      <!-- Hero Section -->
-      <div style="max-width: 1200px; margin: 0 auto; padding: 60px 20px 40px;">
-        <div style="text-align: center; margin-bottom: 60px;">
-          <h1 style="font-size: 4em; margin: 0; background: linear-gradient(135deg, ${color} 0%, #7b68ee 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-            💥 MDRUN
-          </h1>
-          <p style="font-size: 1.8em; color: #8b949e; margin: 20px 0 10px 0;">
-            Markdown Executable Runtime
-          </p>
-          <p style="font-size: 1.2em; color: #484f58; max-width: 600px; margin: 0 auto;">
-            Where documentation becomes the application
-          </p>
-        </div>
+  // Build examples HTML
+  let examplesHTML = ''
+  examples.forEach(ex => {
+    examplesHTML += '<a href="' + ex.url + '" class="example-card" style="display: block; padding: 30px; background: ' + ex.bg + '; border-radius: 12px; text-decoration: none; color: white; transition: transform 0.2s; border: 2px solid rgba(255,255,255,0.1);">'
+    examplesHTML += '<div style="font-size: 3em; margin-bottom: 15px;">' + ex.emoji + '</div>'
+    examplesHTML += '<h3 style="margin: 0 0 10px 0; font-size: 1.4em;">' + ex.title + '</h3>'
+    examplesHTML += '<p style="margin: 0; opacity: 0.9; font-size: 14px;">' + ex.desc + '</p>'
+    examplesHTML += '</a>'
+  })
 
-        <!-- Quick Stats -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; max-width: 800px; margin: 0 auto 60px;">
-          <div style="text-align: center; padding: 20px; background: #161b22; border-radius: 8px; border: 1px solid #30363d;">
-            <div style="font-size: 2em;">📝</div>
-            <div style="color: #8b949e; font-size: 14px; margin-top: 8px;">Zero Install</div>
-          </div>
-          <div style="text-align: center; padding: 20px; background: #161b22; border-radius: 8px; border: 1px solid #30363d;">
-            <div style="font-size: 2em;">⚡</div>
-            <div style="color: #8b949e; font-size: 14px; margin-top: 8px;">No Build</div>
-          </div>
-          <div style="text-align: center; padding: 20px; background: #161b22; border-radius: 8px; border: 1px solid #30363d;">
-            <div style="font-size: 2em;">🎨</div>
-            <div style="color: #8b949e; font-size: 14px; margin-top: 8px;">3D Graphics</div>
-          </div>
-          <div style="text-align: center; padding: 20px; background: #161b22; border-radius: 8px; border: 1px solid #30363d;">
-            <div style="font-size: 2em;">🔧</div>
-            <div style="color: #8b949e; font-size: 14px; margin-top: 8px;">URL Config</div>
-          </div>
-        </div>
+  // Build docs HTML
+  let docsHTML = ''
+  docs.forEach(doc => {
+    docsHTML += '<a href="' + doc.url + '" style="display: block; padding: 20px; background: #161b22; border: 1px solid #30363d; border-radius: 8px; text-decoration: none; color: #c9d1d9;">'
+    docsHTML += '<span style="font-size: 1.5em; margin-right: 10px;">' + doc.icon + '</span>'
+    docsHTML += '<span style="color: #58a6ff;">' + doc.title + '</span>'
+    docsHTML += '</a>'
+  })
 
-        <!-- Examples Grid -->
-        <h2 style="font-size: 2em; margin: 0 0 30px 0; color: #58a6ff;">
-          ✨ Examples & Templates
-        </h2>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-bottom: 60px;">
-          ${examples.map(ex => `
-            <a href="${ex.url}" style="
-              display: block;
-              padding: 30px;
-              background: ${ex.bg};
-              border-radius: 12px;
-              text-decoration: none;
-              color: white;
-              transition: transform 0.2s, box-shadow 0.2s;
-              cursor: pointer;
-              border: 2px solid rgba(255,255,255,0.1);
-            " onmouseenter="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.4)'" onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-              <div style="font-size: 3em; margin-bottom: 15px;">${ex.emoji}</div>
-              <h3 style="margin: 0 0 10px 0; font-size: 1.4em;">${ex.title}</h3>
-              <p style="margin: 0; opacity: 0.9; font-size: 14px;">${ex.desc}</p>
-            </a>
-          `).join('')}
-        </div>
+  output.innerHTML = '<div style="min-height: 100vh; background: #0d1117; color: #c9d1d9;"><div style="max-width: 1200px; margin: 0 auto; padding: 60px 20px 40px;"><div style="text-align: center; margin-bottom: 60px;"><h1 style="font-size: 4em; margin: 0; background: linear-gradient(135deg, ' + color + ' 0%, #7b68ee 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">💥 MDRUN</h1><p style="font-size: 1.8em; color: #8b949e; margin: 20px 0 10px 0;">Markdown Executable Runtime</p><p style="font-size: 1.2em; color: #484f58; max-width: 600px; margin: 0 auto;">Where documentation becomes the application</p></div><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; max-width: 800px; margin: 0 auto 60px;"><div style="text-align: center; padding: 20px; background: #161b22; border-radius: 8px; border: 1px solid #30363d;"><div style="font-size: 2em;">📝</div><div style="color: #8b949e; font-size: 14px; margin-top: 8px;">Zero Install</div></div><div style="text-align: center; padding: 20px; background: #161b22; border-radius: 8px; border: 1px solid #30363d;"><div style="font-size: 2em;">⚡</div><div style="color: #8b949e; font-size: 14px; margin-top: 8px;">No Build</div></div><div style="text-align: center; padding: 20px; background: #161b22; border-radius: 8px; border: 1px solid #30363d;"><div style="font-size: 2em;">🎨</div><div style="color: #8b949e; font-size: 14px; margin-top: 8px;">3D Graphics</div></div><div style="text-align: center; padding: 20px; background: #161b22; border-radius: 8px; border: 1px solid #30363d;"><div style="font-size: 2em;">🔧</div><div style="color: #8b949e; font-size: 14px; margin-top: 8px;">URL Config</div></div></div><h2 style="font-size: 2em; margin: 0 0 30px 0; color: #58a6ff;">✨ Examples & Templates</h2><div id="examples-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-bottom: 60px;">' + examplesHTML + '</div><h2 style="font-size: 2em; margin: 0 0 20px 0; color: #58a6ff;">📚 Documentation</h2><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 60px;">' + docsHTML + '</div><div style="background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 40px; margin-bottom: 40px;"><h2 style="margin: 0 0 20px 0; color: #58a6ff;">🚀 Quick Actions</h2><div style="display: grid; gap: 15px;"><div style="padding: 15px; background: #0d1117; border-radius: 6px; font-family: monospace; font-size: 14px; color: #8b949e;"><strong style="color: #3fb950;">Launch:</strong> ?name=' + name + '&color=' + color.replace('#', '0x') + '</div><div style="padding: 15px; background: #0d1117; border-radius: 6px; font-family: monospace; font-size: 14px; color: #8b949e;"><strong style="color: #3fb950;">Debug:</strong> ?debug=true&logs=true</div><div style="padding: 15px; background: #0d1117; border-radius: 6px; font-family: monospace; font-size: 14px; color: #8b949e;"><strong style="color: #3fb950;">Keyboard:</strong> Ctrl+L for logs</div></div></div><div style="text-align: center; padding: 40px 0; color: #484f58; border-top: 1px solid #21262d;"><p style="margin: 0 0 10px 0;">MDRUN v' + MDRUN.version + ' | <a href="README.md" style="color: #58a6ff;">Source</a> | <a href="?debug=true" style="color: #58a6ff;">Debug</a></p><p style="margin: 10px 0 0 0;">📝 = 💻 = 🚀</p></div></div></div>'
 
-        <!-- Documentation -->
-        <h2 style="font-size: 2em; margin: 0 0 20px 0; color: #58a6ff;">
-          📚 Documentation
-        </h2>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 60px;">
-          ${docs.map(doc => `
-            <a href="${doc.url}" style="
-              display: block;
-              padding: 20px;
-              background: #161b22;
-              border: 1px solid #30363d;
-              border-radius: 8px;
-              text-decoration: none;
-              color: #c9d1d9;
-              transition: border-color 0.2s;
-            " onmouseenter="this.style.borderColor='#58a6ff'" onmouseleave="this.style.borderColor='#30363d'">
-              <span style="font-size: 1.5em; margin-right: 10px;">${doc.icon}</span>
-              <span style="color: #58a6ff;">${doc.title}</span>
-            </a>
-          `).join('')}
-        </div>
-
-        <!-- Quick Actions -->
-        <div style="background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 40px; margin-bottom: 40px;">
-          <h2 style="margin: 0 0 20px 0; color: #58a6ff;">🚀 Quick Actions</h2>
-          <div style="display: grid; gap: 15px;">
-            <div style="padding: 15px; background: #0d1117; border-radius: 6px; font-family: monospace; font-size: 14px; color: #8b949e;">
-              <strong style="color: #3fb950;">Launch with params:</strong> ?name=${name}&color=${color.replace('#', '0x')}
-            </div>
-            <div style="padding: 15px; background: #0d1117; border-radius: 6px; font-family: monospace; font-size: 14px; color: #8b949e;">
-              <strong style="color: #3fb950;">Debug mode:</strong> ?debug=true&logs=true
-            </div>
-            <div style="padding: 15px; background: #0d1117; border-radius: 6px; font-family: monospace; font-size: 14px; color: #8b949e;">
-              <strong style="color: #3fb950;">Keyboard:</strong> Ctrl+L / Cmd+L to toggle logs
-            </div>
-          </div>
-        </div>
-
-        <!-- Footer -->
-        <div style="text-align: center; padding: 40px 0; color: #484f58; border-top: 1px solid #21262d;">
-          <p style="margin: 0 0 10px 0;">
-            Powered by MDRUN v${MDRUN.version} |
-            <a href="README.md" style="color: #58a6ff; text-decoration: none;">Source</a> |
-            <a href="?debug=true" style="color: #58a6ff; text-decoration: none;">Debug</a>
-          </p>
-          <p style="margin: 10px 0 0 0; font-size: 14px;">
-            📝 = 💻 = 🚀
-          </p>
-        </div>
-      </div>
-    </div>
-  `
+  // Add hover effects
+  document.querySelectorAll('.example-card').forEach(card => {
+    card.addEventListener('mouseenter', function() {
+      this.style.transform = 'translateY(-4px)'
+      this.style.boxShadow = '0 8px 24px rgba(0,0,0,0.4)'
+    })
+    card.addEventListener('mouseleave', function() {
+      this.style.transform = 'translateY(0)'
+      this.style.boxShadow = 'none'
+    })
+  })
 
   MDRUN.success('Navigation UI loaded with ' + examples.length + ' examples')
   console.log(`✅ MDRUN landing page ready`)
