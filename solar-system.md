@@ -6,6 +6,11 @@ Usage: `index.html?src=solar-system.md`
 
 ---
 
+```html
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+```
+
 ```js
 function main(params) {
   const planetCount = parseInt(params.planets) || 5
@@ -199,8 +204,6 @@ function main(params) {
 ```
 
 ```html
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 ```
 
 ---

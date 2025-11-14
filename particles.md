@@ -6,6 +6,11 @@ Usage: `index.html?src=particles.md`
 
 ---
 
+```html
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+```
+
 ```js
 function main(params) {
   const particleCount = parseInt(params.count) || 5000
@@ -146,11 +151,6 @@ function main(params) {
 
   MDRUN.success(`Galaxy created with ${particleCount.toLocaleString()} particles`)
 }
-```
-
-```html
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 ```
 
 ---
