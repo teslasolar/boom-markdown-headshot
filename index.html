@@ -287,8 +287,46 @@ async function init() {
 
       if (b.lang === 'html') {
         MDRUN.debug('Injecting HTML block')
-        document.getElementById('output').innerHTML += b.code
-        MDRUN.success(`HTML block ${i + 1} injected`)
+
+        // Parse and execute script tags properly
+        const tempDiv = document.createElement('div')
+        tempDiv.innerHTML = b.code
+
+        // Extract and execute script tags
+        const scripts = tempDiv.querySelectorAll('script')
+        scripts.forEach(oldScript => {
+          const newScript = document.createElement('script')
+
+          // Copy attributes
+          Array.from(oldScript.attributes).forEach(attr => {
+            newScript.setAttribute(attr.name, attr.value)
+          })
+
+          // Copy inline code
+          if (!oldScript.src) {
+            newScript.textContent = oldScript.textContent
+          }
+
+          // Remove from temp and add to head
+          oldScript.remove()
+          document.head.appendChild(newScript)
+
+          MDRUN.debug(`Loaded script: ${oldScript.src || 'inline'}`)
+        })
+
+        // Add remaining HTML to output
+        document.getElementById('output').innerHTML += tempDiv.innerHTML
+
+        // Wait for external scripts to load if any
+        if (scripts.length > 0) {
+          const srcScripts = Array.from(scripts).filter(s => s.src)
+          if (srcScripts.length > 0) {
+            MDRUN.debug(`Waiting for ${srcScripts.length} external scripts to load...`)
+            await new Promise(resolve => setTimeout(resolve, 500))
+          }
+        }
+
+        MDRUN.success(`HTML block ${i + 1} injected (${scripts.length} scripts)`)
       }
     }
 
