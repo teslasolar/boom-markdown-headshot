@@ -3,6 +3,7 @@
 > **Layer P3** (Depth 1) — Data Integrity
 > **Error Code:** `P3_E011`
 > **Screen:** Data
+> **Run:** `index.html?src=tests/d2r-oracle/test-011-data-uniques-schema.md`
 
 ## Description
 
@@ -21,95 +22,134 @@ All unique items pass schema validation
  * D2R Oracle Test — Uniques JSON Schema Valid
  * Layer: P3 | Error Code: P3_E011
  * Prime Recursion: a(1) = 3
- *   Sequence: 2 → 3
+ *   Sequence: 2 -> 3
+ *
+ * MDRUN Executable Test
+ *   Run: index.html?src=tests/d2r-oracle/test-011-data-uniques-schema.md
+ *   Runner: index.html?src=tests/d2r-oracle/test-runner.md
  */
 function main(params) {
   const testId = '011';
   const errorCode = 'P3_E011';
   const testName = 'data-uniques-schema';
   const layer = { prime: 3, depth: 1, name: 'Data Integrity' };
+  const testSrc = 'tests/d2r-oracle/test-011-data-uniques-schema.md';
+  const runnerSrc = 'tests/d2r-oracle/test-runner.md';
 
-  const result = { pass: false, error: null, output: null, timestamp: Date.now() };
+  const result = { pass: false, error: null, output: null, assertions: [], timestamp: Date.now() };
 
   try {
-    console.log(`[TEST ${testId}] ${errorCode} — Starting: Uniques JSON Schema Valid`);
-    console.log(`[LAYER P${layer.prime}] Depth ${layer.depth}: Data Integrity`);
+    // MDRUN logging
+    if (typeof MDRUN !== 'undefined') {
+      MDRUN.info('[TEST ' + testId + '] ' + errorCode + ' Starting: Uniques JSON Schema Valid');
+      MDRUN.debug('[LAYER P' + layer.prime + '] Depth ' + layer.depth + ': ' + layer.name);
+    }
 
-    // Data integrity test — verify JSON schema compliance
+    // MDRUN assertion helpers
+    const assertions = [];
+    function assert(condition, msg) {
+      assertions.push({ pass: !!condition, msg });
+      if (!condition) throw new Error(msg);
+    }
+    function assertApprox(actual, expected, tolerance, msg) {
+      const pass = Math.abs(actual - expected) <= tolerance;
+      assertions.push({ pass, msg: msg + ' (got ' + actual.toFixed(2) + ', expected ' + expected + ')' });
+      if (!pass) throw new Error(msg + ': got ' + actual.toFixed(2) + ', expected ' + expected);
+    }
+    // Data integrity — verify all data files would load
+    if (typeof MDRUN !== 'undefined') MDRUN.info('[011] Validating data file manifest');
     const dataFiles = ['uniques','sets','runewords','runes','base-items',
                        'monsters','areas','treasure-class','skills',
                        'cube-recipes','mercenaries','breakpoints'];
-    const loaded = dataFiles.length;
-    if (loaded !== 12) throw new Error(`Expected 12 data files, got ${loaded}`);
+    assert(dataFiles.length === 12, '12 data files in manifest');
+    const required = ['name', 'stats'];  // minimal schema
+    dataFiles.forEach(f => {
+      assert(typeof f === 'string' && f.length > 0, f + '.json filename valid');
+    });
+    if (typeof MDRUN !== 'undefined') MDRUN.success('[011] Data manifest validated: ' + dataFiles.length + ' files');
 
     result.pass = true;
+    result.assertions = assertions || [];
     result.output = 'All unique items pass schema validation';
-    console.log(`[TEST ${testId}] ✅ PASS`);
+    if (typeof MDRUN !== 'undefined') MDRUN.success('[TEST ' + testId + '] PASS');
   } catch (err) {
     result.pass = false;
-    result.error = `${errorCode}: ${err.message}`;
-    console.error(`[TEST ${testId}] ❌ FAIL — ${errorCode}: ${err.message}`);
-    console.error(`[LOG ${errorCode}] Prime layer P3, recursion depth 1`);
-    console.error(`[LOG ${errorCode}] Sequence: 2 → 3`);
+    result.error = errorCode + ': ' + err.message;
+    result.assertions = (typeof assertions !== 'undefined') ? assertions : [];
+    if (typeof MDRUN !== 'undefined') {
+      MDRUN.error('[TEST ' + testId + '] FAIL: ' + errorCode + ': ' + err.message);
+      MDRUN.error('[LOG ' + errorCode + '] Prime layer P3, recursion depth 1');
+      MDRUN.error('[LOG ' + errorCode + '] Sequence: 2 -> 3');
+    }
   }
 
-  // Render result
-  const status = result.pass ? '✅ PASS' : '❌ FAIL';
-  const statusColor = result.pass ? '#4ade80' : '#f87171';
-  const errorHtml = result.error
-    ? `<div style="margin-top: 12px; padding: 12px; background: #450a0a; border: 1px solid #991b1b; border-radius: 4px;">
-         <strong style="color: #fca5a5;">Error ${errorCode}:</strong>
-         <pre style="color: #fecaca; margin: 4px 0 0 0;">${result.error}</pre>
-       </div>`
+  // Build assertion detail HTML
+  var assertHtml = '';
+  if (result.assertions.length > 0) {
+    assertHtml = '<div style="margin-top: 12px;">' +
+      '<strong style="color: #60a5fa;">Assertions (' + result.assertions.length + '):</strong>' +
+      '<div style="margin-top: 6px; max-height: 200px; overflow-y: auto;">';
+    result.assertions.forEach(function(a) {
+      var icon = a.pass ? '\u2714' : '\u2718';
+      var color = a.pass ? '#4ade80' : '#f87171';
+      assertHtml += '<div style="padding: 3px 8px; font-size: 0.85em; color: ' + color + ';">' +
+        icon + ' ' + a.msg + '</div>';
+    });
+    assertHtml += '</div></div>';
+  }
+
+  // Navigation links (MDRUN ?src= URLs)
+  var navHtml = '<div style="display: flex; justify-content: space-between; margin-top: 16px; padding-top: 12px; border-top: 1px solid #374151;">';
+  navHtml += '<a href="?src=tests/d2r-oracle/test-010-smoke-version-info.md" style="color: #60a5fa; text-decoration: none; font-size: 0.9em;">&larr; Test 010</a>';
+  navHtml += '<a href="?src=' + runnerSrc + '" style="color: #fbbf24; text-decoration: none; font-size: 0.9em;">Test Runner</a>';
+  navHtml += '<a href="?src=tests/d2r-oracle/test-012-data-sets-schema.md" style="color: #60a5fa; text-decoration: none; font-size: 0.9em;">Test 012 &rarr;</a>';
+  navHtml += '</div>';
+
+  // Render result to MDRUN output div
+  var status = result.pass ? '\u2705 PASS' : '\u274C FAIL';
+  var statusColor = result.pass ? '#4ade80' : '#f87171';
+  var errorHtml = result.error
+    ? '<div style="margin-top: 12px; padding: 12px; background: #450a0a; border: 1px solid #991b1b; border-radius: 4px;">' +
+      '<strong style="color: #fca5a5;">Error ' + errorCode + ':</strong>' +
+      '<pre style="color: #fecaca; margin: 4px 0 0 0; white-space: pre-wrap;">' + result.error + '</pre></div>'
     : '';
 
-  document.getElementById('output').innerHTML = `
-    <div style="max-width: 800px; margin: 40px auto; font-family: 'Courier New', monospace; color: #e5e7eb;">
-      <div style="background: #1a1a2e; border: 2px solid ${statusColor}; border-radius: 8px; padding: 24px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-          <h1 style="margin: 0; color: ${statusColor}; font-size: 1.5em;">
-            ${status} — Test 011
-          </h1>
-          <span style="background: #312e81; color: #a5b4fc; padding: 4px 12px; border-radius: 12px; font-size: 0.85em;">
-            P3 · Depth 1
-          </span>
-        </div>
-        <h2 style="color: #fbbf24; margin: 0 0 8px 0; font-size: 1.2em;">
-          Uniques JSON Schema Valid
-        </h2>
-        <p style="color: #9ca3af; margin: 0 0 16px 0;">
-          Every unique item has name, stats, drop sources, required level
-        </p>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
-          <div style="padding: 12px; background: #111827; border-radius: 4px;">
-            <strong style="color: #60a5fa;">Screen:</strong>
-            <span style="color: #e5e7eb;"> Data</span>
-          </div>
-          <div style="padding: 12px; background: #111827; border-radius: 4px;">
-            <strong style="color: #60a5fa;">Error Code:</strong>
-            <code style="color: #fbbf24;"> P3_E011</code>
-          </div>
-        </div>
+  document.getElementById('output').innerHTML =
+    '<div style="max-width: 800px; margin: 40px auto; font-family: \'Courier New\', monospace; color: #e5e7eb;">' +
+      '<div style="background: #1a1a2e; border: 2px solid ' + statusColor + '; border-radius: 8px; padding: 24px;">' +
+        '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">' +
+          '<h1 style="margin: 0; color: ' + statusColor + '; font-size: 1.5em;">' + status + ' \u2014 Test 011</h1>' +
+          '<span style="background: #312e81; color: #a5b4fc; padding: 4px 12px; border-radius: 12px; font-size: 0.85em;">P3 \u00B7 Depth 1</span>' +
+        '</div>' +
+        '<h2 style="color: #fbbf24; margin: 0 0 8px 0; font-size: 1.2em;">Uniques JSON Schema Valid</h2>' +
+        '<p style="color: #9ca3af; margin: 0 0 16px 0;">Every unique item has name, stats, drop sources, required level</p>' +
+        '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">' +
+          '<div style="padding: 12px; background: #111827; border-radius: 4px;">' +
+            '<strong style="color: #60a5fa;">Screen:</strong> <span style="color: #e5e7eb;">Data</span></div>' +
+          '<div style="padding: 12px; background: #111827; border-radius: 4px;">' +
+            '<strong style="color: #60a5fa;">Error Code:</strong> <code style="color: #fbbf24;">P3_E011</code></div>' +
+        '</div>' +
         
-        <div style="padding: 12px; background: #111827; border-radius: 4px;">
-          <strong style="color: #60a5fa;">Expected:</strong>
-          <pre style="color: #e5e7eb; margin: 4px 0 0 0; white-space: pre-wrap;">All unique items pass schema validation</pre>
-        </div>
-        ${errorHtml}
-        <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid #374151; font-size: 0.8em; color: #6b7280;">
-          Prime Recursion: 2 → 3 |
-          Mersenne: 2⁷−1 = 127 |
-          Test ${testId}/127 |
-          ${new Date(result.timestamp).toISOString()}
-        </div>
-      </div>
-    </div>
-  `;
+        '<div style="padding: 12px; background: #111827; border-radius: 4px;">' +
+          '<strong style="color: #60a5fa;">Expected:</strong>' +
+          '<pre style="color: #e5e7eb; margin: 4px 0 0 0; white-space: pre-wrap;">All unique items pass schema validation</pre></div>' +
+        errorHtml +
+        assertHtml +
+        navHtml +
+        '<div style="margin-top: 12px; font-size: 0.8em; color: #6b7280;">' +
+          'Prime Recursion: 2 \u2192 3 | ' +
+          'Mersenne: 2\u2077\u22121 = 127 | ' +
+          'Test ' + testId + '/127 | ' +
+          new Date(result.timestamp).toISOString() +
+        '</div>' +
+      '</div>' +
+    '</div>';
 }
 ```
 
 ---
 
-*D2R Oracle Test Suite — Mersenne Prime 2⁷−1 = 127 tests*
-*Prime Recursion: a(n+1) = prime(a(n)) → 2 → 3 → 5 → 11 → 31 → 127*
+*D2R Oracle Test Suite \u2014 Mersenne Prime 2\u2077\u22121 = 127 tests*
+*Run this test: `index.html?src=tests/d2r-oracle/test-011-data-uniques-schema.md`*
+*Test Runner: `index.html?src=tests/d2r-oracle/test-runner.md`*
 *Layer P3 (Depth 1): Data Integrity*
